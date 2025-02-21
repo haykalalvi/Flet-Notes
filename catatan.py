@@ -7,7 +7,7 @@ import mysql.connector
 
 NOTES_DIR = "notes"
 AUDIO_DIR = "voice_notes"
-
+#coba cobaadff
 # Koneksi ke database
 db = mysql.connector.connect(
     host="Alvis-MacBook-Pro.local",
