@@ -101,6 +101,10 @@ def main(page: ft.Page):
         on_change=lambda e: load_selected_note(e, text_field),
     )
 
+    # Fungsi untuk mendapatkan warna kursor berdasarkan mode tema
+    def get_cursor_color():
+        return "black" if page.theme_mode == ft.ThemeMode.LIGHT else "white"
+
     text_field = ft.TextField(
         multiline=True,
         expand=True,
@@ -108,7 +112,7 @@ def main(page: ft.Page):
         border=ft.InputBorder.NONE,
         min_lines=30,
         content_padding=30,
-        cursor_color="black",
+        cursor_color=get_cursor_color(),  # Atur warna kursor sesuai mode tema
         value="",
         on_change=lambda e: save_note(note_dropdown.value, text_field.value) if note_dropdown.value else None,
     )
@@ -175,6 +179,7 @@ def main(page: ft.Page):
     def toggle_theme(e):
         page.theme_mode = ft.ThemeMode.DARK if page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
         theme_button.text = "🌙 Mode Gelap" if page.theme_mode == ft.ThemeMode.LIGHT else "☀️ Mode Terang"
+        text_field.cursor_color = get_cursor_color()  # Update warna kursor
         page.update()
 
     # Inisialisasi tombol yang akan ditampilkan pada laman
