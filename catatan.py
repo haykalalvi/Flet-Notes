@@ -7,8 +7,8 @@ import mysql.connector
 
 NOTES_DIR = "notes"
 AUDIO_DIR = "voice_notes"
-#coba cobaadff
-# Koneksi ke database
+
+# Menginisiasi Koneksi ke database
 db = mysql.connector.connect(
     host="Alvis-MacBook-Pro.local",
     user="root",
@@ -57,14 +57,14 @@ def rename_note(old_name, new_name, page, note_dropdown, text_field):
     text_field.value = load_note(new_name)
     page.update()
 
-# Fungsi pencarian catatan
+# Fungsi untuk melakukan pencarian catatan
 def search_notes(query, note_dropdown, page):
     note_dropdown.options = [
         ft.dropdown.Option(name) for name in get_note_list() if query.lower() in name.lower()
     ]
     page.update()
 
-# Fungsi merekam audio
+# Fungsi untuk merekam audio
 def record_audio(note_name, duration=5, samplerate=44100):
     audio_path = os.path.join(AUDIO_DIR, f"{note_name}.wav")
     print(f"Merekam audio selama {duration} detik...")
@@ -77,7 +77,7 @@ def record_audio(note_name, duration=5, samplerate=44100):
         wf.writeframes(recording.tobytes())
     print("Rekaman selesai!")
 
-# Fungsi memutar audio
+# Fungsi untuk memutar audio
 def play_audio(note_name):
     audio_path = os.path.join(AUDIO_DIR, f"{note_name}.wav")
     if os.path.exists(audio_path):
@@ -87,9 +87,9 @@ def play_audio(note_name):
             sd.play(data, samplerate)
             sd.wait()
 
-# Fungsi utama
+# Fungsi utama untuk aplikasi
 def main(page: ft.Page):
-    page.title = "Multi-Notes dengan Voice Notes"
+    page.title = "Notes For Productivity"
     page.scroll = True
     page.theme_mode = ft.ThemeMode.LIGHT  # Default: Mode Terang
 
@@ -112,13 +112,14 @@ def main(page: ft.Page):
         value="",
         on_change=lambda e: save_note(note_dropdown.value, text_field.value) if note_dropdown.value else None,
     )
-
+    # Fungsi untuk memuat catatan yang dipilih oleh pengguna
     def load_selected_note(e, text_field):
         selected_note = note_dropdown.value
         if selected_note:
             text_field.value = load_note(selected_note)
             page.update()
-
+    
+    # Fungsi untuk membuat catatan baru
     def create_new_note(e):
         new_note_name = new_note_field.value.strip()
         if new_note_name and new_note_name not in get_note_list():
@@ -128,10 +129,12 @@ def main(page: ft.Page):
             text_field.value = ""
             page.update()
 
+    # Fungsi untuk menampilkan dialog konfirmasi ketika pengguna ingin menghapus catatan
     def delete_selected_note(e):
         if note_dropdown.value:
             show_delete_confirmation(note_dropdown.value)
 
+    # Fungsi untuk menampilkan dialog konfirmasi ketika pengguna ingin menghapus catatan
     def show_delete_confirmation(note_name):
         def confirm_delete(e):
             delete_note(note_name, page, note_dropdown, text_field)
@@ -148,15 +151,17 @@ def main(page: ft.Page):
             actions_alignment=ft.MainAxisAlignment.END,
         )
         page.open(dialog)
-
+    # Fungsi untuk mengganti nama catatan yang dipilih oleh pengguna
     def rename_selected_note(e):
         new_name = rename_field.value.strip()
         if note_dropdown.value and new_name:
             rename_note(note_dropdown.value, new_name, page, note_dropdown, text_field)
 
+    # Fungsi untuk melakukan pencarian catatan
     def search_handler(e):
         search_notes(search_field.value, note_dropdown, page)
 
+    # Fungsi untuk merekam dan memutar audio
     def record_voice_note(e):
         if note_dropdown.value:
             record_audio(note_dropdown.value)
@@ -166,13 +171,13 @@ def main(page: ft.Page):
         if note_dropdown.value:
             play_audio(note_dropdown.value)
 
-    # 🔥 Toggle Mode Gelap/Terang
+    # Fungsi untuk mengganti Mode Gelap/Terang
     def toggle_theme(e):
         page.theme_mode = ft.ThemeMode.DARK if page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
         theme_button.text = "🌙 Mode Gelap" if page.theme_mode == ft.ThemeMode.LIGHT else "☀️ Mode Terang"
         page.update()
 
-    # Tombol Mode Gelap/Terang
+    # Inisialisasi tombol yang akan ditampilkan pada laman
     theme_button = ft.ElevatedButton("🌙 Mode Gelap", on_click=toggle_theme)
 
     search_field = ft.TextField(hint_text="Cari catatan...", width=200, on_change=search_handler)
@@ -187,7 +192,7 @@ def main(page: ft.Page):
 
     delete_button = ft.ElevatedButton("Hapus Catatan", on_click=delete_selected_note, bgcolor="red")
 
-    # Tambahkan tombol toggle ke halaman
+    # Bagian yang akan menambahkan toggle ke laman atau page
     page.add(
         ft.Row([theme_button], alignment=ft.MainAxisAlignment.END),
         ft.Row(
