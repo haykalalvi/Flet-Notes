@@ -22,6 +22,10 @@ for directory in [NOTES_DIR, AUDIO_DIR]:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+def show_snackbar(page, message):
+    page.open(ft.SnackBar(ft.Text(message),bgcolor= "white"))
+    page.update()
+
 # Fungsi untuk mengambil daftar catatan dari database
 def get_note_list():
     cursor.execute("SELECT name FROM notes")
@@ -87,8 +91,36 @@ def play_audio(note_name):
             sd.play(data, samplerate)
             sd.wait()
 
+
+# Fungsi untuk logout
+def logout(page):
+    global current_user
+    current_user = None
+    page.clean()  # Bersihkan UI setelah logout
+    show_login_screen(page)  # Kembali ke halaman login
+
+# Fungsi untuk menampilkan layar login
+def show_login_screen(page):
+    username_field = ft.TextField(label="Username", width=300)
+    password_field = ft.TextField(label="Password", password=True, width=300)
+    login_button = ft.ElevatedButton(
+        "Login",
+        on_click=lambda e: login(username_field.value, password_field.value, page)
+    )
+
+    page.add(
+        ft.Column([
+            ft.Text("Silakan Login", size=20, weight="bold"),
+            username_field,
+            password_field,
+            login_button
+        ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+    )
+
+
+
 # Fungsi utama untuk aplikasi
-def main(page: ft.Page):
+def main_app(page: ft.Page):
     page.title = "Notes For Productivity"
     page.scroll = True
     page.theme_mode = ft.ThemeMode.LIGHT  # Default: Mode Terang
@@ -182,6 +214,11 @@ def main(page: ft.Page):
         text_field.cursor_color = get_cursor_color()  # Update warna kursor
         page.update()
 
+
+    def handle_logout(e):
+        logout(page)
+    
+
     # Inisialisasi tombol yang akan ditampilkan pada laman
     theme_button = ft.ElevatedButton("🌙 Mode Gelap", on_click=toggle_theme)
 
@@ -208,5 +245,21 @@ def main(page: ft.Page):
         ft.Row([rename_field, rename_button, delete_button], alignment=ft.MainAxisAlignment.CENTER),
         text_field,
     )
+
+def login(username, password, page):
+    global current_user
+    cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
+    user = cursor.fetchone()
+    if user:
+        current_user = username
+        page.clean()
+        main_app(page)
+    else:    
+        show_snackbar(page, "Login gagal! Username atau password salah.")
+
+
+# Menjalankan aplikasi dengan halaman login terlebih dahulu
+def main(page: ft.Page):
+    show_login_screen(page)
 
 ft.app(target=main)
